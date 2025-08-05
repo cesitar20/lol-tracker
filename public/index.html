@@ -51,6 +51,18 @@
   <label for="tagLine">Tag (#):</label>
   <input type="text" id="tagLine" placeholder="Ej: LAN">
 
+  <label for="queueSelect">Tipo de partida:</label>
+  <select id="queueSelect">
+    <option value="420">Solo Q</option>
+    <option value="440">Flex</option>
+    <option value="430">Normal</option>
+    <option value="400">Normal Draft</option>
+    <option value="450">ARAM</option>
+    <option value="700">Clash</option>
+    <option value="900">URF</option>
+    <option value="">Todos</option>
+  </select>
+
   <button onclick="buscarMatches()">Buscar Partidas</button>
 
   <div id="loading"></div>
