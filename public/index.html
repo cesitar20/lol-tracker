@@ -2,18 +2,21 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LoL Match Tracker</title>
+  <!-- Evita 404 de favicon -->
+  <link rel="icon" href="data:," />
 </head>
 <body>
   <h1>LoL Match Tracker</h1>
 
-  <label>Nombre del invocador:</label>
-  <input type="text" id="summonerName" placeholder="Ej: Faker" />
+  <label for="summonerName">Nombre del invocador:</label><br>
+  <input type="text" id="summonerName" placeholder="Ej: Faker" /><br><br>
 
-  <label>Tag:</label>
-  <input type="text" id="tagLine" placeholder="Ej: KR1" />
+  <label for="tagLine">Tag (por ejemplo LAN):</label><br>
+  <input type="text" id="tagLine" placeholder="Ej: LAN" /><br><br>
 
-  <label>Tipo de partida:</label>
+  <label for="queueSelect">Tipo de partida:</label><br>
   <select id="queueSelect">
     <option value="">Todas</option>
     <option value="420">Solo Q</option>
@@ -23,26 +26,26 @@
     <option value="700">Clash</option>
     <option value="900">URF</option>
     <option value="0">Custom</option>
-  </select>
+  </select><br><br>
 
-  <button onclick="buscarPartidas()">Buscar Partidas</button>
+  <button id="btnBuscar">Buscar partidas</button><br><br>
 
-  <table id="tablaResultados" border="1">
+  <table id="tablaResultados" border="1" style="width:100%; border-collapse: collapse;">
     <thead>
       <tr>
         <th>Campeón</th>
         <th>K/D/A</th>
-        <th>¿Victoria?</th>
-        <th>CS</th>
+        <th>Victoria</th>
+        <th>Minions</th>
         <th>Posición</th>
-        <th>Rival Directo</th>
+        <th>Rival</th>
       </tr>
     </thead>
     <tbody>
-      <!-- Se llena con JS -->
+      <!-- Se llenará dinámicamente -->
     </tbody>
   </table>
 
-  <script src="scripts/data_fetch.js"></script>
+  <script type="module" src="scripts/data_fetch.js"></script>
 </body>
 </html>
