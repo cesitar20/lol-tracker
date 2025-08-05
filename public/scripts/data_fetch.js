@@ -1,23 +1,4 @@
-(() => {
-  const DefaultBackground = "linear-gradient(to right, ghostwhite, gainsboro)";
-  const ErrorBackground = "linear-gradient(to right, crimson, darkred)";
-  const SuccessBackground = "linear-gradient(to right, mediumseagreen, mediumspringgreen)";
-  const InfoBackground = "linear-gradient(to right, darkturquoise, deepskyblue)";
-  const WarningBackground = "linear-gradient(to right, goldenrod, darkorange)";
-
-  function merge(base, over) {
-    return { ...base, ...over, style: { ...base.style, ...over.style } };
-  }
-  const baseOptions = {
-    defaultOptions: { duration: 3000, close: true, gravity: 'bottom', position: 'right', stopOnFocus: true,
-      style: { color: '#fff', fontSize: '16px', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
-  };
-  window.toaster = {
-    showErrorToast: opts => Toastify(merge(baseOptions.defaultOptions, { text: opts.text, style: { background: ErrorBackground }})).showToast(),
-    showSuccessToast: opts => Toastify(merge(baseOptions.defaultOptions, { text: opts.text, style: { background: SuccessBackground }})).showToast(),
-    showInfoToast: opts => Toastify(merge(baseOptions.defaultOptions, { text: opts.text, style: { background: InfoBackground }})).showToast(),
-  };
-})();
+// public/scripts/data_fetch.js
 
 const ENDPOINT = '/api/fetch_matches';
 let isSearching = false;
@@ -43,6 +24,8 @@ async function buscarPartidas() {
   isSearching = true;
   const btn = document.getElementById('btnBuscar');
   btn.disabled = true;
+  
+  // Usar el toaster desde el módulo separado
   window.toaster.showInfoToast({ text: 'Iniciando búsqueda...' });
 
   const name = document.getElementById('summonerName').value.trim();

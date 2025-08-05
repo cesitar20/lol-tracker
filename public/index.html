@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,6 +9,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <link rel="stylesheet" href="/styles/main.css">
 </head>
+
 <body>
   <div class="container">
     <header>
@@ -17,19 +19,19 @@
       </div>
       <p class="subtitle">Busca tus partidas recientes y analiza tu rendimiento</p>
     </header>
-    
+
     <section class="search-section">
       <div class="form-grid">
         <div class="form-group">
           <label for="summonerName"><i class="fas fa-user"></i> Nombre de Invocador</label>
           <input type="text" id="summonerName" placeholder="Ej: YasuoPro">
         </div>
-        
+
         <div class="form-group">
           <label for="tagLine"><i class="fas fa-tag"></i> Tag</label>
           <input type="text" id="tagLine" placeholder="Ej: NA1">
         </div>
-        
+
         <div class="form-group">
           <label for="queueSelect"><i class="fas fa-list"></i> Modo de Juego</label>
           <select id="queueSelect">
@@ -41,12 +43,12 @@
           </select>
         </div>
       </div>
-      
+
       <button id="btnBuscar">
         <i class="fas fa-search"></i> Buscar Partidas
       </button>
     </section>
-    
+
     <section class="results-section">
       <div class="stats">
         <div class="stat-box">
@@ -66,7 +68,7 @@
           <div class="stat-label">Visión Prom.</div>
         </div>
       </div>
-      
+
       <table id="tablaResultados">
         <thead>
           <tr>
@@ -88,40 +90,41 @@
         </tbody>
       </table>
     </section>
-    
+
     <footer>
       <p>Buscador de Partidas &copy; 2023 | Datos proporcionados por Riot Games API</p>
     </footer>
   </div>
-  
+
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+  <script src="/scripts/toast.js"></script> <!-- Nuevo módulo Toastify -->
   <script src="/scripts/data_fetch.js"></script>
-  
+
   <script>
     // Actualizar estadísticas cuando se carguen partidas
     function updateStats(matches) {
       document.getElementById('totalMatches').textContent = matches.length;
-      
+
       if (matches.length > 0) {
         const wins = matches.filter(m => m.win).length;
         const winRate = ((wins / matches.length) * 100).toFixed(1);
         document.getElementById('winRate').textContent = winRate + '%';
-        
+
         const totalKda = matches.reduce((sum, m) => {
           return sum + (m.kills + m.assists) / Math.max(m.deaths, 1);
         }, 0);
         const avgKda = (totalKda / matches.length).toFixed(2);
         document.getElementById('avgKda').textContent = avgKda;
-        
+
         const totalVision = matches.reduce((sum, m) => sum + m.visionScore, 0);
         const avgVision = Math.round(totalVision / matches.length);
         document.getElementById('avgVision').textContent = avgVision;
       }
     }
-    
+
     // Sobrescribir la función para actualizar estadísticas
     const originalBuscarPartidas = buscarPartidas;
-    window.buscarPartidas = async function() {
+    window.buscarPartidas = async function () {
       await originalBuscarPartidas();
       const tbody = document.querySelector('#tablaResultados tbody');
       if (tbody.children.length > 0 && !tbody.children[0].textContent.includes('No se encontraron')) {
@@ -140,4 +143,5 @@
     };
   </script>
 </body>
+
 </html>
