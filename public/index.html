@@ -1,24 +1,78 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Estadísticas de Partidas LoL</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LoL Match Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    label, input {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 30px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    #loading {
+      margin-top: 20px;
+      color: green;
+    }
+  </style>
 </head>
 <body>
-  <h1>Historial de Partidas</h1>
-  <input type="text" id="gameName" placeholder="Nombre del jugador" />
-  <input type="text" id="tagLine" placeholder="Tag (#LAN)" />
-  <button onclick="buscar()">Buscar</button>
-  <pre id="result"></pre>
 
-  <script>
-    async function buscar() {
-      const gameName = document.getElementById('gameName').value;
-      const tagLine = document.getElementById('tagLine').value;
-      const res = await fetch(`/api/matches?gameName=${gameName}&tagLine=${tagLine}`);
-      const data = await res.json();
-      document.getElementById('result').textContent = JSON.stringify(data, null, 2);
-    }
-  </script>
+  <h1>League of Legends Match Tracker</h1>
+
+  <label for="gameName">Nombre del Invocador:</label>
+  <input type="text" id="gameName" placeholder="Ej: Cesitar20">
+
+  <label for="tagLine">Tag (#):</label>
+  <input type="text" id="tagLine" placeholder="Ej: LAN">
+
+  <button onclick="buscarMatches()">Buscar Partidas</button>
+
+  <div id="loading"></div>
+
+  <table id="matchTable">
+    <thead>
+      <tr>
+        <th>Campeón</th>
+        <th>KDA</th>
+        <th>Win</th>
+        <th>Rol</th>
+        <th>Daño</th>
+        <th>Visión</th>
+        <th>Minions</th>
+        <th>Rival</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Aquí se insertarán dinámicamente los datos -->
+    </tbody>
+  </table>
+
+  <script src="./scripts/data_fetch.js"></script>
 </body>
 </html>
