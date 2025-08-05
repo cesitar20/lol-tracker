@@ -1,54 +1,65 @@
-// public/scripts/data_fetch.js
+// Inicializar ToastifyPreFab (usar tu snippet aquí)
+(() => {
+  const DefaultBackground = "linear-gradient(to right, ghostwhite, gainsboro)";
+  const ErrorBackground = "linear-gradient(to right, crimson, darkred)";
+  const SuccessBackground = "linear-gradient(to right, mediumseagreen, mediumspringgreen)";
+  const InfoBackground = "linear-gradient(to right, darkturquoise, deepskyblue)";
+  const WarningBackground = "linear-gradient(to right, goldenrod, darkorange)";
+
+  function BuildToastifyPreFab({ defaultOptions = {}, overrideDefaultOptions = {}, overrideErrorOptions = {}, overrideSuccessOptions = {}, overrideInfoOptions = {}, overrideWarningOptions = {}, } = {}) {
+    const options = { ...defaultOptions, ...overrideDefaultOptions, style: { ...defaultOptions.style, ...overrideDefaultOptions.style }};
+    const merge = (base, over) => ({ ...base, ...over, style: { ...base.style, ...over.style }});
+    const toastError   = opt => Toastify(merge(options,opt, overrideErrorOptions)).showToast();
+    const toastSuccess = opt => Toastify(merge(options,opt, overrideSuccessOptions)).showToast();
+    const toastInfo    = opt => Toastify(merge(options,opt, overrideInfoOptions)).showToast();
+    return { showErrorToast: toastError, showSuccessToast: toastSuccess, showInfoToast: toastInfo };
+  }
+  window.toaster = BuildToastifyPreFab({
+    defaultOptions: { duration: 3000, close: true, gravity: 'bottom', position: 'right', stopOnFocus: true, style: { color: '#fff', fontSize: '16px', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' } },
+    overrideErrorOptions: { text: 'Error', style: { background: ErrorBackground } },
+    overrideSuccessOptions: { text: 'Éxito', style: { background: SuccessBackground } },
+    overrideInfoOptions: { text: 'Info', style: { background: InfoBackground } }
+  });
+})();
 
 const ENDPOINT = '/api/fetch_matches';
 
 async function buscarPartidas() {
-  console.log('[INFO] Ejecutando buscarPartidas()');
+  toaster.showInfoToast({ text: 'Iniciando búsqueda...' });
   const name = document.getElementById('summonerName').value.trim();
-  const tag  = document.getElementById('tagLine'     ).value.trim();
+  const tag  = document.getElementById('tagLine').value.trim();
   const queue= document.getElementById('queueSelect').value;
 
-  console.log('[INFO] Inputs recibidos:', { name, tag, queue });
-
+  console.log('[INFO] Inputs:', { name, tag, queue });
   if (!name || !tag) {
-    console.warn('[WARN] Falta nombre o tag');
-    alert('Debes ingresar Nombre y Tag');
+    toaster.showErrorToast({ text: 'Falta nombre o tag' });
     return;
   }
 
-  const url = `${ENDPOINT}?gameName=${encodeURIComponent(name)}`
-            + `&tagLine=${encodeURIComponent(tag)}`
-            + `&queueId=${encodeURIComponent(queue)}`;
-
-  console.log('[INFO] Llamando al endpoint:', url);
-
   try {
+    const url = `${ENDPOINT}?gameName=${encodeURIComponent(name)}&tagLine=${encodeURIComponent(tag)}&queueId=${encodeURIComponent(queue)}`;
+    console.log('[INFO] Fetching:', url);
     const res = await fetch(url);
-    console.log('[DEBUG] Status de la respuesta:', res.status);
-
+    console.log('[DEBUG] Status:', res.status);
     if (!res.ok) {
       const err = await res.json();
-      console.error('[ERROR] API respondió error:', err);
-      alert('Error: ' + (err.error || res.statusText));
+      console.error('[ERROR]', err);
+      toaster.showErrorToast({ text: err.error });
       return;
     }
 
     const { matches } = await res.json();
-    console.log('[INFO] Matches recibidos:', matches);
-
+    toaster.showSuccessToast({ text: `Encontradas ${matches.length} partidas` });
     const tbody = document.querySelector('#tablaResultados tbody');
     tbody.innerHTML = '';
 
     if (!matches.length) {
-      console.warn('[WARN] No se encontraron partidas');
-      const row = document.createElement('tr');
-      row.innerHTML = '<td colspan="6" style="text-align:center">No se encontraron partidas.</td>';
-      tbody.appendChild(row);
+      const row = document.createElement('tr'); row.innerHTML = '<td colspan="6">Sin partidas</td>'; tbody.appendChild(row);
       return;
     }
 
     matches.forEach(m => {
-      console.log('[DEBUG] Renderizando partida:', m.matchId);
+      console.log('[DEBUG] Render:', m.matchId);
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${m.champion}</td>
@@ -62,10 +73,9 @@ async function buscarPartidas() {
     });
 
   } catch (err) {
-    console.error('[ERROR] Excepción en buscarPartidas():', err);
-    alert('Ocurrió un error al buscar partidas. Revisa la consola.');
+    console.error('[ERROR] Exception:', err);
+    toaster.showErrorToast({ text: 'Error en conexión' });
   }
 }
 
-// Asociar el botón a la función
 document.getElementById('btnBuscar').addEventListener('click', buscarPartidas);
