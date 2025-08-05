@@ -1,4 +1,6 @@
-// Inicializar ToastifyPreFab (usar tu snippet aquí)
+// public/scripts/data_fetch.js
+
+// Toastify initialization
 (() => {
   const DefaultBackground = "linear-gradient(to right, ghostwhite, gainsboro)";
   const ErrorBackground = "linear-gradient(to right, crimson, darkred)";
@@ -6,75 +8,90 @@
   const InfoBackground = "linear-gradient(to right, darkturquoise, deepskyblue)";
   const WarningBackground = "linear-gradient(to right, goldenrod, darkorange)";
 
-  function BuildToastifyPreFab({ defaultOptions = {}, overrideDefaultOptions = {}, overrideErrorOptions = {}, overrideSuccessOptions = {}, overrideInfoOptions = {}, overrideWarningOptions = {}, } = {}) {
-    const options = { ...defaultOptions, ...overrideDefaultOptions, style: { ...defaultOptions.style, ...overrideDefaultOptions.style }};
-    const merge = (base, over) => ({ ...base, ...over, style: { ...base.style, ...over.style }});
-    const toastError   = opt => Toastify(merge(options,opt, overrideErrorOptions)).showToast();
-    const toastSuccess = opt => Toastify(merge(options,opt, overrideSuccessOptions)).showToast();
-    const toastInfo    = opt => Toastify(merge(options,opt, overrideInfoOptions)).showToast();
-    return { showErrorToast: toastError, showSuccessToast: toastSuccess, showInfoToast: toastInfo };
+  function merge(base, over) {
+    return { ...base, ...over, style: { ...base.style, ...over.style } };
   }
-  window.toaster = BuildToastifyPreFab({
-    defaultOptions: { duration: 3000, close: true, gravity: 'bottom', position: 'right', stopOnFocus: true, style: { color: '#fff', fontSize: '16px', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' } },
-    overrideErrorOptions: { text: 'Error', style: { background: ErrorBackground } },
-    overrideSuccessOptions: { text: 'Éxito', style: { background: SuccessBackground } },
-    overrideInfoOptions: { text: 'Info', style: { background: InfoBackground } }
-  });
+  const baseOptions = {
+    defaultOptions: { duration: 3000, close: true, gravity: 'bottom', position: 'right', stopOnFocus: true,
+      style: { color: '#fff', fontSize: '16px', borderRadius: '4px', boxShadow: '0 2px 4px rgba(0,0,0,0.2)' }}
+  };
+  window.toaster = {
+    showErrorToast: opts => Toastify(merge(baseOptions.defaultOptions, { text: opts.text, style: { background: ErrorBackground }})).showToast(),
+    showSuccessToast: opts => Toastify(merge(baseOptions.defaultOptions, { text: opts.text, style: { background: SuccessBackground }})).showToast(),
+    showInfoToast: opts => Toastify(merge(baseOptions.defaultOptions, { text: opts.text, style: { background: InfoBackground }})).showToast(),
+  };
 })();
 
 const ENDPOINT = '/api/fetch_matches';
+let isSearching = false;
 
 async function buscarPartidas() {
-  toaster.showInfoToast({ text: 'Iniciando búsqueda...' });
+  if (isSearching) {
+    console.warn('[WARN] Búsqueda ya en curso');
+    return;
+  }
+  isSearching = true;
+  const btn = document.getElementById('btnBuscar');
+  btn.disabled = true;
+  window.toaster.showInfoToast({ text: 'Iniciando búsqueda...' });
+
   const name = document.getElementById('summonerName').value.trim();
   const tag  = document.getElementById('tagLine').value.trim();
   const queue= document.getElementById('queueSelect').value;
-
   console.log('[INFO] Inputs:', { name, tag, queue });
+
   if (!name || !tag) {
-    toaster.showErrorToast({ text: 'Falta nombre o tag' });
+    window.toaster.showErrorToast({ text: 'Falta nombre o tag' });
+    btn.disabled = false;
+    isSearching = false;
     return;
   }
 
+  const url = `${ENDPOINT}?gameName=${encodeURIComponent(name)}`
+            + `&tagLine=${encodeURIComponent(tag)}`
+            + `&queueId=${encodeURIComponent(queue)}`;
+  console.log('[INFO] Fetching:', url);
+
   try {
-    const url = `${ENDPOINT}?gameName=${encodeURIComponent(name)}&tagLine=${encodeURIComponent(tag)}&queueId=${encodeURIComponent(queue)}`;
-    console.log('[INFO] Fetching:', url);
     const res = await fetch(url);
     console.log('[DEBUG] Status:', res.status);
     if (!res.ok) {
       const err = await res.json();
-      console.error('[ERROR]', err);
-      toaster.showErrorToast({ text: err.error });
+      console.error('[ERROR] API:', err);
+      window.toaster.showErrorToast({ text: err.error || 'Error en API' });
       return;
     }
-
     const { matches } = await res.json();
-    toaster.showSuccessToast({ text: `Encontradas ${matches.length} partidas` });
+    console.log('[INFO] Matches recibidos:', matches);
+    window.toaster.showSuccessToast({ text: `Encontradas ${matches.length} partidas` });
+
     const tbody = document.querySelector('#tablaResultados tbody');
     tbody.innerHTML = '';
-
     if (!matches.length) {
-      const row = document.createElement('tr'); row.innerHTML = '<td colspan="6">Sin partidas</td>'; tbody.appendChild(row);
-      return;
+      const row = document.createElement('tr');
+      row.innerHTML = '<td colspan="6" style="text-align:center">No se encontraron partidas.</td>';
+      tbody.appendChild(row);
+    } else {
+      matches.forEach(m => {
+        console.log('[DEBUG] Render:', m.matchId);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${m.champion}</td>
+          <td>${m.kills}/${m.deaths}/${m.assists}</td>
+          <td>${m.win ? '✅' : '❌'}</td>
+          <td>${m.minions}</td>
+          <td>${m.lane}</td>
+          <td>${m.rival || 'N/A'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
-
-    matches.forEach(m => {
-      console.log('[DEBUG] Render:', m.matchId);
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${m.champion}</td>
-        <td>${m.kills}/${m.deaths}/${m.assists}</td>
-        <td>${m.win ? '✅' : '❌'}</td>
-        <td>${m.minions}</td>
-        <td>${m.lane}</td>
-        <td>${m.rival || 'N/A'}</td>
-      `;
-      tbody.appendChild(tr);
-    });
-
   } catch (err) {
     console.error('[ERROR] Exception:', err);
-    toaster.showErrorToast({ text: 'Error en conexión' });
+    window.toaster.showErrorToast({ text: 'Error en conexión' });
+  } finally {
+    btn.disabled = false;
+    isSearching = false;
   }
 }
 
