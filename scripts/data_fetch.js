@@ -1,89 +1,116 @@
-async function buscarMatches() {
-  const gameName = document.getElementById('gameName').value.trim();
-  const tagLine = document.getElementById('tagLine').value.trim();
-  const loading = document.getElementById('loading');
-  const tableBody = document.querySelector('#matchTable tbody');
+// scripts/data_fetch.js
 
-  // Limpiar tabla y mensajes anteriores
-  tableBody.innerHTML = '';
-  loading.textContent = 'Buscando partidas...';
-  console.log('[INFO] Iniciando búsqueda para:', gameName, tagLine);
+const API_KEY = "TU_TOKEN_AQUI"; // Reemplaza esto cada 24h
+const REGION_ROUTING = "americas"; // Para LAN
+const LOCAL_REGION = "la1"; // Región local para Riot ID
 
-  if (!gameName || !tagLine) {
-    loading.textContent = 'Por favor ingresa el nombre y tag del jugador.';
-    console.warn('[WARN] Falta nombre o tag');
+async function buscarPartidas() {
+  const name = document.getElementById("summonerName").value.trim();
+  const tag = document.getElementById("tagLine").value.trim();
+  const queue = document.getElementById("queueSelect").value;
+
+  if (!name || !tag) {
+    alert("Por favor ingresa un nombre y tag.");
     return;
   }
 
-  try {
-    // ⚠️ Aquí va tu futura llamada al backend (serverless API)
-    // Por ahora lo simulamos
-    const response = await fakeMatchData(); // función simulada
+  console.log("Buscando jugador:", name, "#", tag);
+  const puuid = await getPUUID(name, tag);
 
-    console.log('[INFO] Datos recibidos:', response);
+  if (!puuid) {
+    alert("No se encontró el jugador");
+    return;
+  }
 
-    if (!Array.isArray(response)) {
-      throw new Error('La respuesta no es una lista de partidas');
-    }
+  console.log("PUUID obtenido:", puuid);
+  const matchIds = await getMatchIds(puuid, queue);
 
-    if (response.length === 0) {
-      loading.textContent = 'No se encontraron partidas recientes.';
-      return;
-    }
+  if (!matchIds || matchIds.length === 0) {
+    alert("No se encontraron partidas.");
+    return;
+  }
 
-    // Insertar datos en la tabla
-    response.forEach(match => {
-      const row = document.createElement('tr');
+  console.log("Match IDs:", matchIds);
 
-      row.innerHTML = `
-        <td>${match.champion}</td>
-        <td>${match.kda}</td>
-        <td>${match.win ? 'Sí' : 'No'}</td>
-        <td>${match.role}</td>
-        <td>${match.damage}</td>
-        <td>${match.vision}</td>
-        <td>${match.minions}</td>
-        <td>${match.rival}</td>
-      `;
+  const tablaBody = document.querySelector("#tablaResultados tbody");
+  tablaBody.innerHTML = "";
 
-      tableBody.appendChild(row);
-    });
+  for (let matchId of matchIds) {
+    const matchData = await getMatchDetails(matchId);
+    if (!matchData) continue;
 
-    loading.textContent = `Mostrando ${response.length} partidas.`;
+    const player = matchData.info.participants.find(p => p.puuid === puuid);
+    if (!player) continue;
 
-  } catch (err) {
-    console.error('[ERROR] Fallo al obtener partidas:', err);
-    loading.textContent = 'Ocurrió un error al buscar partidas.';
+    const rival = matchData.info.participants.find(p =>
+      p.teamId !== player.teamId &&
+      p.individualPosition === player.individualPosition
+    );
+
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td>${player.championName}</td>
+      <td>${player.kills}/${player.deaths}/${player.assists}</td>
+      <td>${player.win ? "Sí" : "No"}</td>
+      <td>${player.totalMinionsKilled}</td>
+      <td>${formatearPosicion(player.teamPosition)}</td>
+      <td>${rival ? rival.championName : "?"}</td>
+    `;
+    tablaBody.appendChild(fila);
   }
 }
 
-// Simulación de respuesta de API
-async function fakeMatchData() {
-  console.log('[DEBUG] Llamando fakeMatchData...');
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        {
-          champion: 'Ahri',
-          kda: '7/2/9',
-          win: true,
-          role: 'MID',
-          damage: 23000,
-          vision: 18,
-          minions: 170,
-          rival: 'Zed'
-        },
-        {
-          champion: 'Lux',
-          kda: '2/5/11',
-          win: false,
-          role: 'SUPP',
-          damage: 9000,
-          vision: 28,
-          minions: 25,
-          rival: 'Brand'
-        }
-      ]);
-    }, 1000); // Simula 1 segundo de espera
-  });
+function formatearPosicion(pos) {
+  const map = {
+    "TOP": "Top",
+    "JUNGLE": "Jungla",
+    "MIDDLE": "Mid",
+    "BOTTOM": "ADC",
+    "UTILITY": "Soporte",
+  };
+  return map[pos] || pos;
+}
+
+async function getPUUID(name, tag) {
+  const url = `https://${REGION_ROUTING}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${name}/${tag}`;
+  try {
+    const res = await fetch(url, {
+      headers: { "X-Riot-Token": API_KEY }
+    });
+    if (!res.ok) throw new Error("Error al obtener PUUID");
+    const data = await res.json();
+    return data.puuid;
+  } catch (e) {
+    console.error("Error getPUUID:", e);
+    return null;
+  }
+}
+
+async function getMatchIds(puuid, queue) {
+  let url = `https://${REGION_ROUTING}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?start=0&count=10`;
+  if (queue) url += `&queue=${queue}`;
+  try {
+    const res = await fetch(url, {
+      headers: { "X-Riot-Token": API_KEY }
+    });
+    if (!res.ok) throw new Error("Error al obtener match IDs");
+    return await res.json();
+  } catch (e) {
+    console.error("Error getMatchIds:", e);
+    return [];
+  }
+}
+
+async function getMatchDetails(matchId) {
+  const url = `https://${REGION_ROUTING}.api.riotgames.com/lol/match/v5/matches/${matchId}`;
+  try {
+    const res = await fetch(url, {
+      headers: { "X-Riot-Token": API_KEY }
+    });
+    if (!res.ok) throw new Error("Error al obtener match details");
+    return await res.json();
+  } catch (e) {
+    console.error("Error getMatchDetails:", e);
+    return null;
+  }
 }

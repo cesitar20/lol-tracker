@@ -2,30 +2,47 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LoL Match Tracker</title>
 </head>
 <body>
-  <h1>Historial de Partidas - League of Legends</h1>
+  <h1>LoL Match Tracker</h1>
 
-  <label for="queueSelect">Tipo de partida:</label>
+  <label>Nombre del invocador:</label>
+  <input type="text" id="summonerName" placeholder="Ej: Faker" />
+
+  <label>Tag:</label>
+  <input type="text" id="tagLine" placeholder="Ej: KR1" />
+
+  <label>Tipo de partida:</label>
   <select id="queueSelect">
+    <option value="">Todas</option>
     <option value="420">Solo Q</option>
     <option value="440">Flex</option>
     <option value="430">Normal</option>
-    <option value="400">Normal Draft</option>
     <option value="450">ARAM</option>
     <option value="700">Clash</option>
     <option value="900">URF</option>
-    <option value="">Todos</option>
+    <option value="0">Custom</option>
   </select>
 
-  <br/><br/>
+  <button onclick="buscarPartidas()">Buscar Partidas</button>
 
-  <button onclick="buscarPartidas()">Buscar</button>
+  <table id="tablaResultados" border="1">
+    <thead>
+      <tr>
+        <th>Campeón</th>
+        <th>K/D/A</th>
+        <th>¿Victoria?</th>
+        <th>CS</th>
+        <th>Posición</th>
+        <th>Rival Directo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Se llena con JS -->
+    </tbody>
+  </table>
 
-  <div id="resultados"></div>
-
-  <script type="module" src="./scripts/data_fetch.js"></script>
+  <script src="scripts/data_fetch.js"></script>
 </body>
 </html>
