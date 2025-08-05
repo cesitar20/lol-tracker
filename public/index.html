@@ -1,55 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LoL Match Tracker</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-    }
-
-    label, input {
-      display: block;
-      margin-bottom: 10px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 30px;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #f2f2f2;
-    }
-
-    #loading {
-      margin-top: 20px;
-      color: green;
-    }
-  </style>
 </head>
 <body>
-
-  <h1>League of Legends Match Tracker</h1>
-
-  <label for="gameName">Nombre del Invocador:</label>
-  <input type="text" id="gameName" placeholder="Ej: Cesitar20">
-
-  <label for="tagLine">Tag (#):</label>
-  <input type="text" id="tagLine" placeholder="Ej: LAN">
+  <h1>Historial de Partidas - League of Legends</h1>
 
   <label for="queueSelect">Tipo de partida:</label>
   <select id="queueSelect">
@@ -63,28 +20,12 @@
     <option value="">Todos</option>
   </select>
 
-  <button onclick="buscarMatches()">Buscar Partidas</button>
+  <br/><br/>
 
-  <div id="loading"></div>
+  <button onclick="buscarPartidas()">Buscar</button>
 
-  <table id="matchTable">
-    <thead>
-      <tr>
-        <th>Campeón</th>
-        <th>KDA</th>
-        <th>Win</th>
-        <th>Rol</th>
-        <th>Daño</th>
-        <th>Visión</th>
-        <th>Minions</th>
-        <th>Rival</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- Aquí se insertarán dinámicamente los datos -->
-    </tbody>
-  </table>
+  <div id="resultados"></div>
 
-  <script src="./scripts/data_fetch.js"></script>
+  <script type="module" src="./scripts/data_fetch.js"></script>
 </body>
 </html>
