@@ -1,5 +1,3 @@
-// api/fetch_matches.js
-
 export default async function handler(req, res) {
   console.log('[INFO] fetch_matches invocado:', req.method, req.query);
   const RIOT_API_KEY = process.env.RIOT_API_KEY;
@@ -57,7 +55,8 @@ export default async function handler(req, res) {
         p.teamId !== player.teamId &&
         p.teamPosition === player.teamPosition
       );
-
+      
+      // Agregar los 5 nuevos campos
       matches.push({
         matchId: id,
         champion: player.championName,
@@ -67,7 +66,12 @@ export default async function handler(req, res) {
         win:       player.win,
         minions:   player.totalMinionsKilled,
         lane:      player.teamPosition,
-        rival:     rival ? rival.championName : null
+        rival:     rival ? rival.championName : null,
+        duration: detail.info.gameDuration, // Duración en segundos
+        totalGold: player.goldEarned,      // Oro total
+        gameType: detail.info.gameMode,     // Tipo de partida
+        gameDate: detail.info.gameCreation, // Fecha en milisegundos
+        visionScore: player.visionScore     // Puntuación de visión
       });
     }
 

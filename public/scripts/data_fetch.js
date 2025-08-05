@@ -1,6 +1,3 @@
-// public/scripts/data_fetch.js
-
-// Toastify initialization
 (() => {
   const DefaultBackground = "linear-gradient(to right, ghostwhite, gainsboro)";
   const ErrorBackground = "linear-gradient(to right, crimson, darkred)";
@@ -24,6 +21,19 @@
 
 const ENDPOINT = '/api/fetch_matches';
 let isSearching = false;
+
+// Función para formatear duración (segundos a MM:SS)
+function formatDuration(seconds) {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Función para formatear fecha
+function formatDate(dateString) {
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString(undefined, options);
+}
 
 async function buscarPartidas() {
   if (isSearching) {
@@ -69,7 +79,7 @@ async function buscarPartidas() {
     tbody.innerHTML = '';
     if (!matches.length) {
       const row = document.createElement('tr');
-      row.innerHTML = '<td colspan="6" style="text-align:center">No se encontraron partidas.</td>';
+      row.innerHTML = '<td colspan="11" style="text-align:center">No se encontraron partidas.</td>';
       tbody.appendChild(row);
     } else {
       matches.forEach(m => {
@@ -82,6 +92,11 @@ async function buscarPartidas() {
           <td>${m.minions}</td>
           <td>${m.lane}</td>
           <td>${m.rival || 'N/A'}</td>
+          <td>${formatDuration(m.duration)}</td>
+          <td>${m.totalGold.toLocaleString()}</td>
+          <td>${m.gameType}</td>
+          <td>${formatDate(m.gameDate)}</td>
+          <td>${m.visionScore}</td>
         `;
         tbody.appendChild(tr);
       });
