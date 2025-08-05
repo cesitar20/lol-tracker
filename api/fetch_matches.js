@@ -1,75 +1,77 @@
-// api/fetch_matches.js
+const API_KEY = "RGAPI-5ad6963b-eef4-4942-b937-573d1e529d1b"; // Cámbiala cada 24h
+const REGION = "americas";
+const PLATFORM = "la1";
 
-export default async function handler(req, res) {
-  const RIOT_API_KEY = process.env.RIOT_API_KEY;
+async function fetchData(url) {
+  console.log("Fetching URL:", url);
+  try {
+    const res = await fetch(url, {
+      headers: { "X-Riot-Token": API_KEY }
+    });
 
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' });
+    if (!res.ok) {
+      console.error("API Error", res.status, await res.text());
+      return null;
+    }
+
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    console.error("Error en fetchData:", err);
+    return null;
   }
+}
 
-  const { gameName, tagLine } = req.body;
+async function buscarPartidas() {
+  const queueId = document.getElementById("queueSelect").value;
+  const gameName = prompt("Nombre del invocador (sin #):");
+  const tagLine = prompt("Tag (por ejemplo LAN):");
 
   if (!gameName || !tagLine) {
-    return res.status(400).json({ error: 'Faltan parámetros' });
+    alert("Debes ingresar el nombre y tag.");
+    return;
   }
 
-  console.log(`[INFO] Buscando partidas de: ${gameName}#${tagLine}`);
+  const resultadosDiv = document.getElementById("resultados");
+  resultadosDiv.innerHTML = "Buscando...";
 
-  try {
-    const region = 'americas'; // para LAN
-    const accountUrl = `https://${region}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${gameName}/${tagLine}`;
-    const accountRes = await fetch(accountUrl, {
-      headers: { 'X-Riot-Token': RIOT_API_KEY }
-    });
+  const accountUrl = `https://${REGION}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${gameName}/${tagLine}`;
+  const account = await fetchData(accountUrl);
+  if (!account || !account.puuid) {
+    resultadosDiv.innerHTML = "No se encontró el usuario.";
+    return;
+  }
 
-    if (!accountRes.ok) {
-      return res.status(500).json({ error: 'Error al obtener PUUID' });
-    }
+  const matchIdsUrl = `https://${REGION}.api.riotgames.com/lol/match/v5/matches/by-puuid/${account.puuid}/ids?count=10${queueId ? `&queue=${queueId}` : ''}`;
+  const matchIds = await fetchData(matchIdsUrl);
+  if (!matchIds || matchIds.length === 0) {
+    resultadosDiv.innerHTML = "No se encontraron partidas.";
+    return;
+  }
 
-    const { puuid } = await accountRes.json();
+  let html = "<table border='1'><tr><th>Campeón</th><th>KDA</th><th>Victoria</th><th>Minions</th><th>Rol</th><th>Enemigo</th></tr>";
 
-    const matchIdsUrl = `https://${region}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?count=5`;
-    const matchesRes = await fetch(matchIdsUrl, {
-      headers: { 'X-Riot-Token': RIOT_API_KEY }
-    });
+  for (const matchId of matchIds) {
+    const matchUrl = `https://${REGION}.api.riotgames.com/lol/match/v5/matches/${matchId}`;
+    const matchData = await fetchData(matchUrl);
+    if (!matchData || !matchData.info) continue;
 
-    if (!matchesRes.ok) {
-      return res.status(500).json({ error: 'Error al obtener IDs de partidas' });
-    }
-
-    const matchIds = await matchesRes.json();
-
-    const matchDetails = await Promise.all(
-      matchIds.map(async (matchId) => {
-        const detailUrl = `https://${region}.api.riotgames.com/lol/match/v5/matches/${matchId}`;
-        const detailRes = await fetch(detailUrl, {
-          headers: { 'X-Riot-Token': RIOT_API_KEY }
-        });
-
-        if (!detailRes.ok) return null;
-        const match = await detailRes.json();
-
-        const participant = match.info.participants.find(p => p.puuid === puuid);
-        if (!participant) return null;
-
-        return {
-          champion: participant.championName,
-          kda: `${participant.kills}/${participant.deaths}/${participant.assists}`,
-          win: participant.win,
-          role: participant.teamPosition,
-          damage: participant.totalDamageDealtToChampions,
-          vision: participant.visionScore,
-          minions: participant.totalMinionsKilled,
-          rival: 'N/A' // Puedes buscar al rival si quieres
-        };
-      })
+    const player = matchData.info.participants.find(p => p.puuid === account.puuid);
+    const enemy = matchData.info.participants.find(p =>
+      p.teamId !== player.teamId &&
+      p.teamPosition === player.teamPosition
     );
 
-    const cleaned = matchDetails.filter(m => m !== null);
-    return res.status(200).json(cleaned);
-
-  } catch (err) {
-    console.error('[ERROR]', err);
-    return res.status(500).json({ error: 'Fallo interno del servidor' });
+    html += `<tr>
+      <td>${player.championName}</td>
+      <td>${player.kills}/${player.deaths}/${player.assists}</td>
+      <td>${player.win ? "✅" : "❌"}</td>
+      <td>${player.totalMinionsKilled}</td>
+      <td>${player.teamPosition}</td>
+      <td>${enemy ? `${enemy.championName}` : "-"}</td>
+    </tr>`;
   }
+
+  html += "</table>";
+  resultadosDiv.innerHTML = html;
 }
