@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Estadísticas de Partidas LoL</title>
+</head>
+<body>
+  <h1>Historial de Partidas</h1>
+  <input type="text" id="gameName" placeholder="Nombre del jugador" />
+  <input type="text" id="tagLine" placeholder="Tag (#LAN)" />
+  <button onclick="buscar()">Buscar</button>
+  <pre id="result"></pre>
+
+  <script>
+    async function buscar() {
+      const gameName = document.getElementById('gameName').value;
+      const tagLine = document.getElementById('tagLine').value;
+      const res = await fetch(`/api/matches?gameName=${gameName}&tagLine=${tagLine}`);
+      const data = await res.json();
+      document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
