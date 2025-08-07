@@ -115,6 +115,7 @@ async function buscarPartidas() {
     window.toaster.showSuccessToast({
       text: `Encontradas ${matches.length} partidas`,
     });
+    window.currentMatches = matches; 
 
     const tbody = document.querySelector("#tablaResultados tbody");
     tbody.innerHTML = "";

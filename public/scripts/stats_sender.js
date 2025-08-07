@@ -13,6 +13,14 @@ export async function sendStats() {
     return;
   }
 
+  // Obtener datos de partidas desde memoria global
+  const partidas = window.currentMatches;
+  console.log("[INFO] Partidas a enviar:", partidas);
+  if (!partidas || !partidas.length) {
+    window.toaster.showErrorToast({ text: "No hay partidas cargadas para enviar" });
+    return;
+  }
+
   btn.disabled = true;
   window.toaster.showInfoToast({ text: "Enviando stats..." });
 
@@ -22,7 +30,10 @@ export async function sendStats() {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ requestFrom: 'stats_button' }) // puedes modificar este payload luego
+      body: JSON.stringify({
+        requestFrom: 'stats_button',
+        partidas
+      })
     });
 
     const data = await res.json();

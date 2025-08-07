@@ -21,7 +21,7 @@ export default async function handler(req, res) {
       throw new Error(puuidData.status?.message || "Error getting PUUID");
 
     const puuid = puuidData.puuid;
-    let idsUrl = `https://${region}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?count=100`;
+    let idsUrl = `https://${region}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?count=30`;
     if (queueId) idsUrl += `&queue=${queueId}`;
 
     const idsRes = await fetch(idsUrl, { headers });
