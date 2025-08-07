@@ -1,4 +1,4 @@
-// api/excel_sender.js
+// === api/excel_sender.js ===
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -8,61 +8,57 @@ export default async function handler(req, res) {
   try {
     const { requestFrom, partidas, username } = req.body;
 
-    console.log("[API] Petición recibida desde:", requestFrom);
-    console.log("[API] Enviada por el usuario:", username);
-    console.log("[API] Partidas recibidas:", partidas);
-    console.log("[API] Total de partidas recibidas:", partidas.length);
+    console.log("[API] ===== INICIO DE SOLICITUD =====");
+    console.log(`[API] Usuario: ${username}`);
+    console.log(`[API] Origen: ${requestFrom}`);
+    console.log(`[API] Total de partidas recibidas: ${partidas.length}`);
 
-    partidas.forEach((p, i) => {
-      console.log(`--- Partida ${i + 1} ---`);
-      console.log(`ID de la partida: ${p.matchId}`);
-      console.log(`Campeón: ${p.champion}`);
-      console.log(`Resultado: ${p.win ? "Victoria" : "Derrota"}`);
-      console.log(`K/D/A: ${p.kills}/${p.deaths}/${p.assists}`);
-      console.log(`Minions: ${p.minions}`);
-      console.log(`Línea: ${p.lane}`);
-      console.log(`Rival: ${p.rival || "N/A"}`);
-      console.log(`Duración: ${p.duration}`);
-      console.log(`Gold: ${p.totalGold}`);
-      console.log(`Tipo de partida: ${p.gameType}`);
-      console.log(`Fecha: ${p.gameDate}`);
-      console.log(`Vision Score: ${p.visionScore}`);
-      console.log(`---`);
-    });
+    const payloadToSend = {
+      username,
+      partidas: partidas.map((p, index) => {
+        const timestamp = new Date(p.gameDate).getTime();
+        console.log(`[API] Partida ${index + 1}: matchId=${p.matchId}, gameDateRaw=${p.gameDate}, timestamp=${timestamp}, iso=${new Date(timestamp).toISOString()}`);
 
-    const data = partidas.map((p) => {
-      return {
-        champion: p.champion,
-        win: p.win,
-        kills: p.kills,
-        deaths: p.deaths,
-        assists: p.assists,
-        gameDate: p.gameDate,
-      };
-    });
+        return {
+          matchId: p.matchId || "",
+          champion: p.champion || "",
+          win: !!p.win,
+          kills: Number(p.kills) || 0,
+          deaths: Number(p.deaths) || 0,
+          assists: Number(p.assists) || 0,
+          minions: Number(p.minions) || 0,
+          duration: Number(p.duration) || 0,
+          totalGold: Number(p.totalGold) || 0,
+          visionScore: Number(p.visionScore) || 0,
+          lane: p.lane || "",
+          rival: p.rival || "",
+          gameType: p.gameType || "",
+          gameDate: timestamp // Este es el único campo de fecha
+        };
+      }),
+    };
 
-    const webAppURL =
-      "https://script.google.com/macros/s/AKfycbx_exD5MGWkSKWOGV6lMYoyY2xLSaC8nvk7AdKDoAoJJJs9WBnkB84nvSl2L9Ajs7if/exec"; // <-- Pega aquí tu URL real
+    const webAppURL = "https://script.google.com/macros/s/AKfycbzZz2x5Oj8jZn2w8TYK1iKKXHJLhFuG79iq1J0A0ezQnPZnGd4p0HVuCkE0qGWkoW5C/exec";
 
-    await fetch(webAppURL, {
+    const response = await fetch(webAppURL, {
       method: "POST",
-      body: JSON.stringify({ username, partidas }),
-      headers: {
-        "Content-Type": "application/json",
-      },
+      body: JSON.stringify(payloadToSend),
+      headers: { "Content-Type": "application/json" },
     });
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Stats recibidos correctamente",
-        data,
-        username,
-      });
-    // dame el for each que lo pueda ver en la consola en el return
+    const gsResponse = await response.json();
+    if (!gsResponse.success) {
+      throw new Error(gsResponse.error || "Error desconocido desde Google Sheets");
+    }
+
+    return res.status(200).json({
+      success: true,
+      inserted: gsResponse.inserted,
+      duplicates: gsResponse.duplicates || 0,
+    });
+
   } catch (err) {
-    console.error("[API ERROR] Error al procesar stats:", err);
-    return res.status(500).json({ error: "Error interno del servidor" });
+    console.error("[API ERROR]", err);
+    return res.status(500).json({ error: err.message });
   }
 }
