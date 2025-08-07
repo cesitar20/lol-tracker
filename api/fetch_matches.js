@@ -51,27 +51,26 @@ export default async function handler(req, res) {
       const detail = await detailRes.json();
 
       const player = detail.info.participants.find(p => p.puuid === puuid);
-      const rival  = detail.info.participants.find(p =>
+      const rival = detail.info.participants.find(p =>
         p.teamId !== player.teamId &&
         p.teamPosition === player.teamPosition
       );
       
-      // Agregar los 5 nuevos campos
       matches.push({
         matchId: id,
         champion: player.championName,
-        kills:     player.kills,
-        deaths:    player.deaths,
-        assists:   player.assists,
-        win:       player.win,
-        minions:   player.totalMinionsKilled,
-        lane:      player.teamPosition,
-        rival:     rival ? rival.championName : null,
-        duration: detail.info.gameDuration, // Duración en segundos
-        totalGold: player.goldEarned,      // Oro total
-        gameType: detail.info.gameMode,     // Tipo de partida
-        gameDate: detail.info.gameCreation, // Fecha en milisegundos
-        visionScore: player.visionScore     // Puntuación de visión
+        kills: player.kills,
+        deaths: player.deaths,
+        assists: player.assists,
+        win: player.win,
+        minions: player.totalMinionsKilled,
+        lane: player.teamPosition,
+        rival: rival ? rival.championName : null,
+        duration: detail.info.gameDuration,
+        totalGold: player.goldEarned,
+        gameType: detail.info.gameMode,
+        gameDate: detail.info.gameCreation,
+        visionScore: player.visionScore
       });
     }
 
