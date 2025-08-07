@@ -1,61 +1,58 @@
 export default async function handler(req, res) {
-  console.log('[INFO] fetch_matches invocado:', req.method, req.query);
+  console.log("[INFO] fetch_matches invocado:", req.method, req.query);
   const RIOT_API_KEY = process.env.RIOT_API_KEY;
-  const { gameName, tagLine, queueId } = req.query;
+  const { gameName, tagLine, queueId, days } = req.query;
 
-  if (!RIOT_API_KEY) {
-    console.error('[ERROR] RIOT_API_KEY no definida');
-    return res.status(500).json({ error: 'RIOT_API_KEY not set' });
-  }
-  if (!gameName || !tagLine) {
-    console.warn('[WARN] Parámetros faltantes:', req.query);
-    return res.status(400).json({ error: 'Missing gameName or tagLine' });
-  }
+  if (!RIOT_API_KEY)
+    return res.status(500).json({ error: "RIOT_API_KEY not set" });
+  if (!gameName || !tagLine)
+    return res.status(400).json({ error: "Missing gameName or tagLine" });
 
-  const region = 'americas';
-  const headers = { 'X-Riot-Token': RIOT_API_KEY };
+  const region = "americas";
+  const headers = { "X-Riot-Token": RIOT_API_KEY };
 
   try {
-    // 1) Obtener PUUID
     const puuidRes = await fetch(
       `https://${region}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/${gameName}/${tagLine}`,
       { headers }
     );
     const puuidData = await puuidRes.json();
-    if (!puuidRes.ok) throw new Error(puuidData.status?.message || 'Error getting PUUID');
-    const puuid = puuidData.puuid;
-    console.log('[INFO] PUUID obtenido:', puuid);
+    if (!puuidRes.ok)
+      throw new Error(puuidData.status?.message || "Error getting PUUID");
 
-    // 2) Obtener match IDs
-    let idsUrl = `https://${region}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?count=10`;
+    const puuid = puuidData.puuid;
+    let idsUrl = `https://${region}.api.riotgames.com/lol/match/v5/matches/by-puuid/${puuid}/ids?count=100`;
     if (queueId) idsUrl += `&queue=${queueId}`;
-    console.log('[INFO] URL de match IDs:', idsUrl);
 
     const idsRes = await fetch(idsUrl, { headers });
-    if (!idsRes.ok) throw new Error('Error fetching match IDs');
-    const matchIds = await idsRes.json();
-    console.log('[INFO] Match IDs:', matchIds);
+    if (!idsRes.ok) throw new Error("Error fetching match IDs");
 
-    // 3) Obtener detalles y formatear
+    const matchIds = await idsRes.json();
+    const now = Date.now();
+    const cutoff = days
+      ? now - parseInt(days) * 24 * 60 * 60 * 1000
+      : now - 24 * 60 * 60 * 1000;
+
     const matches = [];
+
     for (const id of matchIds) {
-      console.log('[DEBUG] Obteniendo detalles de:', id);
       const detailRes = await fetch(
-        `https://${region}.api.riotgames.com/lol/match/v5/matches/${id}`, 
+        `https://${region}.api.riotgames.com/lol/match/v5/matches/${id}`,
         { headers }
       );
-      if (!detailRes.ok) {
-        console.warn('[WARN] Falló fetch match detail:', id);
-        continue;
-      }
-      const detail = await detailRes.json();
+      if (!detailRes.ok) continue;
 
-      const player = detail.info.participants.find(p => p.puuid === puuid);
-      const rival = detail.info.participants.find(p =>
-        p.teamId !== player.teamId &&
-        p.teamPosition === player.teamPosition
+      const detail = await detailRes.json();
+      const gameTime = detail.info.gameCreation;
+
+      if (gameTime < cutoff) continue;
+
+      const player = detail.info.participants.find((p) => p.puuid === puuid);
+      const rival = detail.info.participants.find(
+        (p) =>
+          p.teamId !== player.teamId && p.teamPosition === player.teamPosition
       );
-      
+
       matches.push({
         matchId: id,
         champion: player.championName,
@@ -70,14 +67,13 @@ export default async function handler(req, res) {
         totalGold: player.goldEarned,
         gameType: detail.info.gameMode,
         gameDate: detail.info.gameCreation,
-        visionScore: player.visionScore
+        visionScore: player.visionScore,
       });
     }
 
     return res.status(200).json({ matches });
-
   } catch (error) {
-    console.error('[ERROR] fetch_matches:', error);
-    return res.status(500).json({ error: 'Server error' });
+    console.error("[ERROR] fetch_matches:", error);
+    return res.status(500).json({ error: "Server error" });
   }
 }

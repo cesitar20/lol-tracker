@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Buscador de Partidas</title>
+  <title>NOX OMEN Tracker</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <link rel="stylesheet" href="/styles/main.css">
@@ -39,11 +39,11 @@
       <div class="form-grid">
         <div class="form-group">
           <label for="username"><i class="fas fa-user"></i> Username</label>
-          <input type="text" id="username" placeholder="Ej: Camilo">
+          <input type="text" id="username" placeholder="Ex: Bruce Vayne">
         </div>
         <div class="form-group">
           <label for="password"><i class="fas fa-lock"></i> Password</label>
-          <input type="password" id="password" placeholder="Ingresa tu contraseña">
+          <input type="password" id="password" placeholder="Enter your password">
         </div>
       </div>
       <button id="btnLogin">
@@ -68,11 +68,11 @@
       <div class="form-grid">
         <div class="form-group">
           <label for="summonerName"><i class="fas fa-user"></i> Summoners Name</label>
-          <input type="text" id="summonerName" placeholder="Ej: Sacamuelitas15">
+          <input type="text" id="summonerName" placeholder="Ex: JhinSyndrome">
         </div>
         <div class="form-group">
           <label for="tagLine"><i class="fas fa-tag"></i> Tag</label>
-          <input type="text" id="tagLine" placeholder="Ej: NA1">
+          <input type="text" id="tagLine" placeholder="Ex: NOX">
         </div>
         <div class="form-group">
           <label for="queueSelect"><i class="fas fa-list"></i> Game Mode</label>
@@ -83,11 +83,10 @@
             <option value="400">Normal</option>
           </select>
         </div>
-        <!-- Nuevo campo de filtro de antigüedad -->
         <div class="form-group">
           <label for="daysFilter"><i class="fas fa-calendar-day"></i> Date</label>
           <select id="daysFilter">
-            <option value="">Default (1 day)</option>
+            <option value="1">Default (1 day)</option>
             <option value="1">1 day</option>
             <option value="3">3 days</option>
             <option value="7">7 days</option>
