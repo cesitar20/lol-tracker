@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,16 +7,61 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <link rel="stylesheet" href="/styles/main.css">
-</head>
+  <style>
+    .login-section {
+      margin: 20px 0;
+      text-align: center;
+    }
 
+    #btnLogin {
+      margin-top: 20px;
+    }
+
+    #btnLogout {
+      background-color: var(--danger);
+    }
+
+    #btnLogout:hover {
+      background-color: #c0392b;
+    }
+  </style>
+</head>
 <body>
-  <div class="container">
+  <div id="login-container" class="container" style="display: none;">
+    <header>
+      <div class="logo">
+        <i class="fas fa-crown"></i>
+        <h1>Iniciar Sesión</h1>
+      </div>
+      <p class="subtitle">Ingresa tus credenciales para acceder al buscador</p>
+    </header>
+    <section class="login-section">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="username"><i class="fas fa-user"></i> Usuario</label>
+          <input type="text" id="username" placeholder="Ej: Camilo">
+        </div>
+        <div class="form-group">
+          <label for="password"><i class="fas fa-lock"></i> Contraseña</label>
+          <input type="password" id="password" placeholder="Ingresa tu contraseña">
+        </div>
+      </div>
+      <button id="btnLogin">
+        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+      </button>
+    </section>
+  </div>
+
+  <div id="main-container" class="container" style="display: none;">
     <header>
       <div class="logo">
         <i class="fas fa-crown"></i>
         <h1>Buscador de Partidas</h1>
       </div>
       <p class="subtitle">Busca tus partidas recientes y analiza tu rendimiento</p>
+      <button id="btnLogout" style="position: absolute; top: 10px; right: 10px;">
+        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+      </button>
     </header>
 
     <section class="search-section">
@@ -26,12 +70,10 @@
           <label for="summonerName"><i class="fas fa-user"></i> Nombre de Invocador</label>
           <input type="text" id="summonerName" placeholder="Ej: YasuoPro">
         </div>
-
         <div class="form-group">
           <label for="tagLine"><i class="fas fa-tag"></i> Tag</label>
           <input type="text" id="tagLine" placeholder="Ej: NA1">
         </div>
-
         <div class="form-group">
           <label for="queueSelect"><i class="fas fa-list"></i> Modo de Juego</label>
           <select id="queueSelect">
@@ -43,7 +85,6 @@
           </select>
         </div>
       </div>
-
       <button id="btnBuscar">
         <i class="fas fa-search"></i> Buscar Partidas
       </button>
@@ -68,7 +109,6 @@
           <div class="stat-label">Visión Prom.</div>
         </div>
       </div>
-
       <table id="tablaResultados">
         <thead>
           <tr>
@@ -97,10 +137,16 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-  <script src="/scripts/toast.js"></script> <!-- Nuevo módulo Toastify -->
+  <script src="/scripts/toast.js"></script>
+  <script src="/scripts/login.js"></script>
   <script src="/scripts/data_fetch.js"></script>
 
-  <script>
+  <script type="module">
+    import { setupAuth } from '/scripts/login.js';
+    
+    // Configurar autenticación al cargar la página
+    setupAuth();
+
     // Actualizar estadísticas cuando se carguen partidas
     function updateStats(matches) {
       document.getElementById('totalMatches').textContent = matches.length;
@@ -143,5 +189,4 @@
     };
   </script>
 </body>
-
 </html>
