@@ -1,4 +1,4 @@
-// public/scripts/data_fetch.js
+// public/scripts/datASDa_fetch.js
 
 const ENDPOINT = '/api/fetch_matches';
 let isSearching = false;
