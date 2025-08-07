@@ -32,7 +32,8 @@ export async function sendStats() {
       },
       body: JSON.stringify({
         requestFrom: 'stats_button',
-        partidas
+        partidas,
+        username: window.currentUsername || 'anónimo'
       })
     });
 
