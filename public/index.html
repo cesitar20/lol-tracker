@@ -31,23 +31,23 @@
     <header>
       <div class="logo">
         <i class="fas fa-crown"></i>
-        <h1>Iniciar Sesión</h1>
+        <h1>Username</h1>
       </div>
-      <p class="subtitle">Ingresa tus credenciales para acceder al buscador</p>
+      <p class="subtitle">Enter your username and password to access the tracker</p>
     </header>
     <section class="login-section">
       <div class="form-grid">
         <div class="form-group">
-          <label for="username"><i class="fas fa-user"></i> Usuario</label>
+          <label for="username"><i class="fas fa-user"></i> Username</label>
           <input type="text" id="username" placeholder="Ej: Camilo">
         </div>
         <div class="form-group">
-          <label for="password"><i class="fas fa-lock"></i> Contraseña</label>
+          <label for="password"><i class="fas fa-lock"></i> Password</label>
           <input type="password" id="password" placeholder="Ingresa tu contraseña">
         </div>
       </div>
       <button id="btnLogin">
-        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+        <i class="fas fa-sign-in-alt"></i> Login
       </button>
     </section>
   </div>
@@ -56,37 +56,46 @@
     <header>
       <div class="logo">
         <i class="fas fa-crown"></i>
-        <h1>Buscador de Partidas</h1>
+        <h1>NOX OMEN Tracker</h1>
       </div>
-      <p class="subtitle">Busca tus partidas recientes y analiza tu rendimiento</p>
+      <p class="subtitle">Search your recent matches NOX OMEN</p>
       <button id="btnLogout" style="position: absolute; top: 10px; right: 10px;">
-        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+        <i class="fas fa-sign-out-alt"></i> Logout
       </button>
     </header>
 
     <section class="search-section">
       <div class="form-grid">
         <div class="form-group">
-          <label for="summonerName"><i class="fas fa-user"></i> Nombre de Invocador</label>
-          <input type="text" id="summonerName" placeholder="Ej: YasuoPro">
+          <label for="summonerName"><i class="fas fa-user"></i> Summoners Name</label>
+          <input type="text" id="summonerName" placeholder="Ej: Sacamuelitas15">
         </div>
         <div class="form-group">
           <label for="tagLine"><i class="fas fa-tag"></i> Tag</label>
           <input type="text" id="tagLine" placeholder="Ej: NA1">
         </div>
         <div class="form-group">
-          <label for="queueSelect"><i class="fas fa-list"></i> Modo de Juego</label>
+          <label for="queueSelect"><i class="fas fa-list"></i> Game Mode</label>
           <select id="queueSelect">
-            <option value="">Todos los modos</option>
-            <option value="420">Clasificatoria Solo/Duo</option>
-            <option value="440">Clasificatoria Flex</option>
+            <option value="">All modes</option>
+            <option value="420">Ranked Solo/Duo</option>
+            <option value="440">Ranked Flex</option>
             <option value="400">Normal</option>
-            <option value="450">ARAM</option>
+          </select>
+        </div>
+        <!-- Nuevo campo de filtro de antigüedad -->
+        <div class="form-group">
+          <label for="daysFilter"><i class="fas fa-calendar-day"></i> Date</label>
+          <select id="daysFilter">
+            <option value="">Default (1 day)</option>
+            <option value="1">1 day</option>
+            <option value="3">3 days</option>
+            <option value="7">7 days</option>
           </select>
         </div>
       </div>
       <button id="btnBuscar">
-        <i class="fas fa-search"></i> Buscar Partidas
+        <i class="fas fa-search"></i> Search Matches
       </button>
     </section>
 
@@ -94,7 +103,7 @@
       <div class="stats">
         <div class="stat-box">
           <div class="stat-value" id="totalMatches">0</div>
-          <div class="stat-label">Partidas</div>
+          <div class="stat-label">Game</div>
         </div>
         <div class="stat-box">
           <div class="stat-value" id="winRate">0%</div>
@@ -102,27 +111,27 @@
         </div>
         <div class="stat-box">
           <div class="stat-value" id="avgKda">0.00</div>
-          <div class="stat-label">KDA Promedio</div>
+          <div class="stat-label">KDA Prom.</div>
         </div>
         <div class="stat-box">
           <div class="stat-value" id="avgVision">0</div>
-          <div class="stat-label">Visión Prom.</div>
+          <div class="stat-label">Vision Prom.</div>
         </div>
       </div>
       <table id="tablaResultados">
         <thead>
           <tr>
-            <th>Campeón</th>
+            <th>Champion</th>
             <th>K/D/A</th>
-            <th>Victoria</th>
+            <th>Result</th>
             <th>Farm</th>
-            <th>Línea</th>
+            <th>Lane</th>
             <th>Rival</th>
-            <th>Duración</th>
-            <th>Oro</th>
-            <th>Tipo</th>
-            <th>Fecha</th>
-            <th>Visión</th>
+            <th>Game Duration</th>
+            <th>Gold</th>
+            <th>Game Type</th>
+            <th>Date</th>
+            <th>Vision</th>
           </tr>
         </thead>
         <tbody>
@@ -132,7 +141,7 @@
     </section>
 
     <footer>
-      <p>Buscador de Partidas &copy; 2023 | Datos proporcionados por Riot Games API</p>
+      <p>NOX OMEN Tracker &copy; 2023 | Data provided by Riot Games API</p>
     </footer>
   </div>
 
