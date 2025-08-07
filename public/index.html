@@ -153,29 +153,7 @@
   <script type="module">
     import { setupAuth } from '/scripts/login.js';
     
-    // Configurar autenticación al cargar la página
     setupAuth();
-
-    // Actualizar estadísticas cuando se carguen partidas
-    function updateStats(matches) {
-      document.getElementById('totalMatches').textContent = matches.length;
-
-      if (matches.length > 0) {
-        const wins = matches.filter(m => m.win).length;
-        const winRate = ((wins / matches.length) * 100).toFixed(1);
-        document.getElementById('winRate').textContent = winRate + '%';
-
-        const totalKda = matches.reduce((sum, m) => {
-          return sum + (m.kills + m.assists) / Math.max(m.deaths, 1);
-        }, 0);
-        const avgKda = (totalKda / matches.length).toFixed(2);
-        document.getElementById('avgKda').textContent = avgKda;
-
-        const totalVision = matches.reduce((sum, m) => sum + m.visionScore, 0);
-        const avgVision = Math.round(totalVision / matches.length);
-        document.getElementById('avgVision').textContent = avgVision;
-      }
-    }
 
     // Sobrescribir la función para actualizar estadísticas
     const originalBuscarPartidas = buscarPartidas;

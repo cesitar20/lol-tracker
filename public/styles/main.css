@@ -208,7 +208,7 @@ tr:hover {
 .stat-value {
   font-size: 1.8rem;
   font-weight: bold;
-  color: #ffd700;
+  color: var(--light);
 }
 
 .stat-label {
@@ -222,6 +222,22 @@ footer {
   padding: 20px;
   font-size: 0.9rem;
   opacity: 0.7;
+}
+
+.text-success {
+  color: var(--success);
+}
+
+.text-warning {
+  color: var(--warning);
+}
+
+.text-danger {
+  color: var(--danger);
+}
+
+.text-light {
+  color: var(--light);
 }
 
 @media (max-width: 768px) {
