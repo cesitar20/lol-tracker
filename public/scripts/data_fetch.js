@@ -30,7 +30,7 @@ function setStatColor(elementId, value, thresholds) {
       el.classList.add("text-success");
     }
   } else {
-    el.classList.add("text-light"); // For totalMatches and avgVision
+    el.classList.add("text-light");
   }
 }
 
@@ -38,7 +38,7 @@ function updateStats(matches) {
   const total = matches.length;
   const totalEl = document.getElementById("totalMatches");
   totalEl.textContent = total;
-  setStatColor("totalMatches", 0, null); // always white
+  setStatColor("totalMatches", 0, null);
 
   if (total > 0) {
     const wins = matches.filter((m) => m.win).length;
@@ -57,7 +57,7 @@ function updateStats(matches) {
     setStatColor("avgKda", parseFloat(avgKda), { low: 1, high: 2 });
 
     document.getElementById("avgVision").textContent = avgVision;
-    setStatColor("avgVision", 0, null); // always white
+    setStatColor("avgVision", 0, null);
   } else {
     document.getElementById("winRate").textContent = "0%";
     document.getElementById("avgKda").textContent = "0.00";
@@ -78,7 +78,10 @@ async function buscarPartidas() {
   const btn = document.getElementById("btnBuscar");
   btn.disabled = true;
 
-  window.toaster.showInfoToast({ text: "Iniciando búsqueda..." });
+  // Mostrar un indicador de carga más claro
+  window.toaster.showInfoToast({
+    text: "Buscando partidas, por favor espera...",
+  });
 
   const name = document.getElementById("summonerName").value.trim();
   const tag = document.getElementById("tagLine").value.trim();
@@ -111,19 +114,20 @@ async function buscarPartidas() {
       return;
     }
     const { matches } = await res.json();
-    console.log("[INFO] Matches recibidos:", matches);
+    console.log("[INFO] Matches recibidos:", matches.length);
     window.toaster.showSuccessToast({
       text: `Encontradas ${matches.length} partidas`,
     });
-    window.currentMatches = matches; 
+    window.currentMatches = matches;
 
     const tbody = document.querySelector("#tablaResultados tbody");
-    tbody.innerHTML = "";
+    // Usar DocumentFragment para optimizar la inserción en el DOM
+    const fragment = document.createDocumentFragment();
     if (!matches.length) {
       const row = document.createElement("tr");
       row.innerHTML =
         '<td colspan="11" style="text-align:center">No se encontraron partidas.</td>';
-      tbody.appendChild(row);
+      fragment.appendChild(row);
     } else {
       matches.forEach((m) => {
         console.log("[DEBUG] Render:", m.matchId);
@@ -141,9 +145,11 @@ async function buscarPartidas() {
           <td>${formatDate(m.gameDate)}</td>
           <td>${m.visionScore}</td>
         `;
-        tbody.appendChild(tr);
+        fragment.appendChild(tr);
       });
     }
+    tbody.innerHTML = "";
+    tbody.appendChild(fragment);
 
     updateStats(matches);
   } catch (err) {
