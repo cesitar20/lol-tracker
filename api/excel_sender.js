@@ -20,7 +20,6 @@ export default async function handler(req, res) {
         console.log(`[API] Partida ${index + 1}: matchId=${p.matchId}, gameDateRaw=${p.gameDate}, timestamp=${timestamp}, iso=${new Date(timestamp).toISOString()}`);
 
         return {
-          matchId: p.matchId || "",
           champion: p.champion || "",
           win: !!p.win,
           kills: Number(p.kills) || 0,
@@ -38,7 +37,7 @@ export default async function handler(req, res) {
       }),
     };
 
-    const webAppURL = "https://script.google.com/macros/s/AKfycbzZz2x5Oj8jZn2w8TYK1iKKXHJLhFuG79iq1J0A0ezQnPZnGd4p0HVuCkE0qGWkoW5C/exec";
+    const webAppURL = "https://script.google.com/macros/s/AKfycbxdwwCuAAjun2UInpgiPIeevKujkjbdh3Wmtd_1_UCJoD5M49_iHbsJk4aPijO-ct57/exec";
 
     const response = await fetch(webAppURL, {
       method: "POST",
